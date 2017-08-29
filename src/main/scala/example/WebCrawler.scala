@@ -6,8 +6,10 @@ import scala.collection.JavaConversions._
 
 object WebCrawler extends App {
 
+  val HOMEPAGE = "http://www.ikea.com"
+
   //val doc = Jsoup.connect("http://en.wikipedia.org/").get
-  val doc = Jsoup.connect("http://www.ikea.com/es/es/").get
+  val doc = Jsoup.connect(s"$HOMEPAGE/es/es/").get
   println(s"outerHtml ${"-"*25}")
   //println(doc.outerHtml())
   val mainMenu = doc.getElementsByClass("row-desktop main-ikea-nav")
@@ -21,8 +23,20 @@ object WebCrawler extends App {
   println(s"first ${"-"*25}")
   println(enlaces.first().html())
   println(s"Camas ${"-"*25}")
-  println(enlaces.first().select("a").first().attr("href"))
-  //val newsHeadlines = doc.select("#mp-itn b a")
-  //newsHeadlines.eachText().foreach(e => println(s"Element: $e"))
+  enlaces.foreach(e => println(e.select("a").first().attr("href")))
+  val firstLink = enlaces.first().select("a").first().attr("href")
+  val camasDoc = Jsoup.connect(s"$HOMEPAGE$firstLink").get()
+  println(s"NEW PAGE ${"-"*25}")
+  println(camasDoc.body().html())
+  println(s"gridRow ${"-"*25}")
+  val gridRow = camasDoc.body().getElementsByClass("gridRow")
+  println(gridRow.html())
+  println(s"categoryContainer ${"-"*25}")
+  val categoryContainers = gridRow.map(_.getElementsByClass("categoryContainer")).filter(_.nonEmpty).flatten
+  categoryContainers.foreach(println)
+  println(s"Links ${"-"*25}")
+  val divs = categoryContainers.map(_.select("a")).filter(_.hasClass("categoryNumber"))
+  val camasLinks = divs.map(_.attr("href"))
+  camasLinks.foreach(println)
 }
 
